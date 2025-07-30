@@ -1,0 +1,612 @@
+{
+  "name": "N*NX",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": true
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -512,
+        -464
+      ],
+      "id": "44e3cab1-aba3-4a14-8b2f-d4513b846b8e",
+      "name": "Telegram Trigger",
+      "webhookId": "c759ed74-1a66-4cf5-9d14-445fb13b204e",
+      "credentials": {
+        "telegramApi": {
+          "id": "ScryJheeetQJan7b",
+          "name": "Test"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        832,
+        -528
+      ],
+      "id": "7f3f0e94-551c-4101-8de1-dc9359a8624d",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "options": {}
+      },
+      "id": "277d8b40-cd57-40fb-beb7-63dc806c14ae",
+      "name": "convert the image file to base64",
+      "type": "n8n-nodes-base.extractFromFile",
+      "position": [
+        384,
+        -272
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an HR expert, you are given a detailed CV text extract\nName\nEmail\nTelephone\nExperience\nSkills\nEducation\n\n{{ $json.text }}",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        1056,
+        -368
+      ],
+      "id": "aad9c092-7f9e-4ba3-b72e-ffec3263c617",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googlePalmApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [\n    {\n      \"role\": \"user\",\n      \"parts\": [\n        {\n          \"inlineData\": {\n            \"mimeType\": \"image/jpeg\",\n            \"data\": \"{{ $json.data }}\"\n          }\n        },\n        {\n          \"text\": \"Extract Only text\"\n        }\n      ]\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "e04ef2d2-83b2-4435-b7a7-c2fe12d2dc24",
+      "name": "Gemini OCR",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        608,
+        -272
+      ],
+      "typeVersion": 4.2,
+      "retryOnFail": true,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "YSb7v4rQb8trMMr1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        -144
+      ],
+      "id": "1981684c-64b4-4124-9233-6989cfd682a7",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "YSb7v4rQb8trMMr1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"Name\": \"frstname lstname\",\n  \"Phone\": \"20109628898\",\n  \"Mail\": \"das@.\",\n  \"Edu\": [\"Unver1\", \"Unver1\"],\n\t\"SKILLS\": [[\"Automation & Scripting\", \"Languages: Python, Bash\"], [\"IT Support & Diagnostics:\", \"Remote Desktop Support\"], [\"Networking & Infrastructure:\", \"TCP/IP, LAN, WAN\"]],\n  \"EXPERIENCE\": [\"Engineered\", \"Developed\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1216,
+        -144
+      ],
+      "id": "4972038c-468c-4ab6-8a8f-27d754cb6387",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=Name: {{ $('Basic LLM Chain').item.json.output.Name }}\nPhone: {{ $('Basic LLM Chain').item.json.output.Phone }}\nMail: {{ $('Basic LLM Chain').item.json.output.Mail }}\n......\nEdu: {{ $json.output.Edu }}\n..............\nEXP: {{ $json.output.EXPERIENCE }}\n.....................\nSKIlls: {{ $json.output.SKILLS[0][0] }} {{ $json.output.SKILLS[1] }}\n\n",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1456,
+        -368
+      ],
+      "id": "852e308f-ad19-4b3f-8889-7b01959bbaa8",
+      "name": "Send a text message",
+      "webhookId": "64414f3c-92a3-4962-9ae0-0bd8119b6c66",
+      "credentials": {
+        "telegramApi": {
+          "id": "ScryJheeetQJan7b",
+          "name": "Test"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.document.file_name }}",
+                    "rightValue": "pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "cd8e79f7-8845-4a4e-99c5-1ba550b23a9b"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PDF"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "3ff1d330-3ea7-4ba7-9549-0075ae538c95",
+                    "leftValue": "={{ $json.message.document.file_name }}",
+                    "rightValue": "png",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PNG"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a7699d00-43c9-4aa7-a25d-13b1c6d936ee",
+                    "leftValue": "={{ $json.message.document.file_name }}",
+                    "rightValue": "jpg",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "JPG"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b7d9ca53-b5e0-45c3-a3fe-1950226c128e",
+                    "leftValue": "={{ $json.message.document.mime_type }}",
+                    "rightValue": "image",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "IMAGE"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        160,
+        -512
+      ],
+      "id": "51059221-b30c-44d8-8db8-5cc03eba14be",
+      "name": "Switch1",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "777f4969-25a0-474d-9b27-80dc7ce717ed",
+                    "leftValue": "={{ $json.message.photo[0] }}",
+                    "rightValue": "image",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "IMagex"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        160,
+        -224
+      ],
+      "id": "7a8fb8a3-2bd7-4bd4-b772-614696a61dcb",
+      "name": "Switch",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "165993e6-7338-47d4-87fb-0d45db8819ce",
+              "name": "text",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "9a051963-eb92-4ca4-b329-62e8af58758b",
+              "name": "text",
+              "value": "={{ $json.candidates[0].content.parts[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        832,
+        -272
+      ],
+      "id": "e4ced39f-95e0-4cfd-bf42-6cda0d7d45c9",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.chat.id }}",
+        "text": "صلي علي النبي ياصديقي 🤍",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -288,
+        -560
+      ],
+      "id": "3a123a01-c16e-4dcf-b864-040596c4b3a8",
+      "name": "Send a text message1",
+      "webhookId": "25fe6bac-d305-4d5e-9c06-2e1148820a67",
+      "credentials": {
+        "telegramApi": {
+          "id": "ScryJheeetQJan7b",
+          "name": "Test"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 25
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -64,
+        -368
+      ],
+      "id": "1f02392b-27cb-4b32-90f9-648e1bc08cf1",
+      "name": "Wait",
+      "webhookId": "5be236fc-9562-4762-97a8-11c35dde67f5"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "04c8de44-d451-484d-9b3a-2ab852bad32c",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "start",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "3c6c894d-f3c7-4631-ad63-2aa55e52cfcd",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "start",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -288,
+        -368
+      ],
+      "id": "d00e6927-1e14-427c-9693-03067950c6de",
+      "name": "If"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "convert the image file to base64": {
+      "main": [
+        [
+          {
+            "node": "Gemini OCR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini OCR": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "convert the image file to base64",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "convert the image file to base64",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "convert the image file to base64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "convert the image file to base64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message1": {
+      "main": [
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6717ae3c-59fa-495d-b3a0-219d2403001a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "afc3141d974f96fe3d5e49cb0c3c0b8ea75e138b9ddbe82a9ad1735d1656ff80"
+  },
+  "id": "QAws0UJ7yG0EdUuh",
+  "tags": []
+}
