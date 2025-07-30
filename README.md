@@ -12,7 +12,7 @@
 
 ## Bot @ZOROx5Dom_bot
 
-<img width="840" height="393" alt="image" src="https://github.com/user-attachments/assets/7f2c0784-ae87-4252-97bf-c65ea4179417" />
+<img width="840" height="416" alt="image" src="https://github.com/user-attachments/assets/1d9456e3-44b7-4582-ac15-35567afff7e7" />
 
 
 ## N8N Telegram Bot
