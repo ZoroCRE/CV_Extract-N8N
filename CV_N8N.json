@@ -131,30 +131,6 @@
     },
     {
       "parameters": {
-        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
-        "text": "=ATS Score : {{ $json.output.ATS }}\n\nName: {{ $('Basic LLM Chain').item.json.output.Name }}\nPhone: {{ $('Basic LLM Chain').item.json.output.Phone }}\nMail: {{ $('Basic LLM Chain').item.json.output.Mail }}\n......\nEdu: {{ $json.output.Edu[0] }}\n..............\nEXP: {{ $json.output.EXPERIENCE }}\n.....................\nSKIlls: {{ $json.output.SKILLS[0][0] }} {{ $json.output.SKILLS[1] }}\n\n",
-        "additionalFields": {
-          "appendAttribution": false
-        }
-      },
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        1472,
-        -368
-      ],
-      "id": "852e308f-ad19-4b3f-8889-7b01959bbaa8",
-      "name": "Send a text message",
-      "webhookId": "64414f3c-92a3-4962-9ae0-0bd8119b6c66",
-      "credentials": {
-        "telegramApi": {
-          "id": "ScryJheeetQJan7b",
-          "name": "Test"
-        }
-      }
-    },
-    {
-      "parameters": {
         "rules": {
           "values": [
             {
@@ -419,6 +395,30 @@
       ],
       "id": "d00e6927-1e14-427c-9693-03067950c6de",
       "name": "If"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=ATS Score : {{ $('Basic LLM Chain').item.json.output.ATS }}\n\nName: {{ $('Basic LLM Chain').item.json.output.Name }}\nPhone: {{ $('Basic LLM Chain').item.json.output.Phone }}\nMail: {{ $('Basic LLM Chain').item.json.output.Mail }}\n......\nEdu: {{ $json.output.Edu.join('\\n\\nEdu: ').replace()}}\n..............\nEXP: {{ $json.output.EXPERIENCE.join('\\n\\nEXP: ').replace()}}\n.....................\nSKIlls:{{ $json.output.SKILLS.join('\\n\\nSkills: ').replace()}}\n\n",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1456,
+        -368
+      ],
+      "id": "caca8c66-3070-4446-b527-f1af3f1d4c87",
+      "name": "Send a text message2",
+      "webhookId": "34f88ae0-4cfc-4977-aac8-4d22b42f974b",
+      "credentials": {
+        "telegramApi": {
+          "id": "ScryJheeetQJan7b",
+          "name": "Test"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -498,16 +498,11 @@
       "main": [
         [
           {
-            "node": "Send a text message",
+            "node": "Send a text message2",
             "type": "main",
             "index": 0
           }
         ]
-      ]
-    },
-    "Send a text message": {
-      "main": [
-        []
       ]
     },
     "Switch1": {
@@ -602,7 +597,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "041bdd95-442e-4140-8a0c-bd2991949784",
+  "versionId": "c4e6e00c-ba15-4c4c-8739-039816799b01",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "afc3141d974f96fe3d5e49cb0c3c0b8ea75e138b9ddbe82a9ad1735d1656ff80"
