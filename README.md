@@ -32,3 +32,12 @@
 ### ATS Score Add 
 
 <img width="590" height="391" alt="image" src="https://github.com/user-attachments/assets/09fb95f7-8e88-456e-9e9c-dca385b878e7" />
+
+
+## **Edit** ##
+
+### Editing Formet Output
+
+
+<img width="590" height="384" alt="image" src="https://github.com/user-attachments/assets/014b9229-12c8-4b2a-a42c-c0f2d8d7ed56" />
+
