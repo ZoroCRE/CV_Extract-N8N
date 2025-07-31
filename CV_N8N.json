@@ -1,5 +1,5 @@
 {
-  "name": "N*NX",
+  "name": "CV_N8N",
   "nodes": [
     {
       "parameters": {
@@ -57,7 +57,7 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=You are an HR expert, you are given a detailed CV text extract\nName\nEmail\nTelephone\nExperience\nSkills\nEducation\n\n{{ $json.text }}",
+        "text": "=You are an HR expert, you are given a detailed CV text extract & get ATS score for this CV\n\nATS\nName\nEmail\nTelephone\nExperience\nSkills\nEducation\n\n{{ $json.text }}",
         "hasOutputParser": true,
         "batching": {}
       },
@@ -118,7 +118,7 @@
     },
     {
       "parameters": {
-        "jsonSchemaExample": "{\n\t\"Name\": \"frstname lstname\",\n  \"Phone\": \"20109628898\",\n  \"Mail\": \"das@.\",\n  \"Edu\": [\"Unver1\", \"Unver1\"],\n\t\"SKILLS\": [[\"Automation & Scripting\", \"Languages: Python, Bash\"], [\"IT Support & Diagnostics:\", \"Remote Desktop Support\"], [\"Networking & Infrastructure:\", \"TCP/IP, LAN, WAN\"]],\n  \"EXPERIENCE\": [\"Engineered\", \"Developed\"]\n}"
+        "jsonSchemaExample": "{\n  \"ATS\": \"70%\",\n\t\"Name\": \"frstname lstname\",\n  \"Phone\": \"20109628898\",\n  \"Mail\": \"das@.\",\n  \"Edu\": [\"Unver1\", \"Unver1\"],\n\t\"SKILLS\": [[\"Automation & Scripting\", \"Languages: Python, Bash\"], [\"IT Support & Diagnostics:\", \"Remote Desktop Support\"], [\"Networking & Infrastructure:\", \"TCP/IP, LAN, WAN\"]],\n  \"EXPERIENCE\": [\"Engineered\", \"Developed\"]\n}"
       },
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
@@ -132,7 +132,7 @@
     {
       "parameters": {
         "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
-        "text": "=Name: {{ $('Basic LLM Chain').item.json.output.Name }}\nPhone: {{ $('Basic LLM Chain').item.json.output.Phone }}\nMail: {{ $('Basic LLM Chain').item.json.output.Mail }}\n......\nEdu: {{ $json.output.Edu }}\n..............\nEXP: {{ $json.output.EXPERIENCE }}\n.....................\nSKIlls: {{ $json.output.SKILLS[0][0] }} {{ $json.output.SKILLS[1] }}\n\n",
+        "text": "=ATS Score : {{ $json.output.ATS }}\n\nName: {{ $('Basic LLM Chain').item.json.output.Name }}\nPhone: {{ $('Basic LLM Chain').item.json.output.Phone }}\nMail: {{ $('Basic LLM Chain').item.json.output.Mail }}\n......\nEdu: {{ $json.output.Edu[0] }}\n..............\nEXP: {{ $json.output.EXPERIENCE }}\n.....................\nSKIlls: {{ $json.output.SKILLS[0][0] }} {{ $json.output.SKILLS[1] }}\n\n",
         "additionalFields": {
           "appendAttribution": false
         }
@@ -140,7 +140,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1456,
+        1472,
         -368
       ],
       "id": "852e308f-ad19-4b3f-8889-7b01959bbaa8",
@@ -602,7 +602,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "6717ae3c-59fa-495d-b3a0-219d2403001a",
+  "versionId": "041bdd95-442e-4140-8a0c-bd2991949784",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "afc3141d974f96fe3d5e49cb0c3c0b8ea75e138b9ddbe82a9ad1735d1656ff80"
